@@ -294,6 +294,13 @@ class ModernMX60EUpdater(ctk.CTk):
         self.login_btn.configure(text="LOGIN", command=self.login, fg_color="#2CC985")
         self.ip_entry.configure(state="normal")
         self.captcha_label.configure(image=None, text="[Captcha]")
+        # Limpiar referencias para evitar problemas al cargar nuevo captcha
+        if hasattr(self, 'photo'):
+            del self.photo
+        if hasattr(self, 'tmp_val'):
+            del self.tmp_val
+        # Limpiar campo de captcha
+        self.captcha_entry.delete(0, 'end')
 
     def check_login(self):
         if not self.is_logged_in:
