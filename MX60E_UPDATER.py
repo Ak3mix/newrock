@@ -28,6 +28,7 @@ class ModernMX60EUpdater(ctk.CTk):
         self.device_ip = ""
         self.is_running = False
         self.is_logged_in = False
+        self.captcha_image_ref = None  # Referencia persistente para la imagen del captcha
 
         # --- Sidebar (Connection & Login) ---
         self.sidebar_frame = ctk.CTkFrame(self, width=250, corner_radius=0)
@@ -231,8 +232,9 @@ class ModernMX60EUpdater(ctk.CTk):
                 image = Image.open(io.BytesIO(img_resp.content))
                 image = image.resize((100, 40), Image.Resampling.LANCZOS)
 
-                self.photo = ImageTk.PhotoImage(image)
-                self.captcha_label.configure(image=self.photo, text="")
+                # Mantener referencia persistente para evitar garbage collection
+                self.captcha_image_ref = ImageTk.PhotoImage(image)
+                self.captcha_label.configure(image=self.captcha_image_ref, text="")
                 self.status_label.configure(text="Captcha Loaded", text_color="green")
                 self.login_btn.configure(state="normal")
                 # Guardamos el tmp_val para login
@@ -294,13 +296,10 @@ class ModernMX60EUpdater(ctk.CTk):
         self.login_btn.configure(text="LOGIN", command=self.login, fg_color="#2CC985")
         self.ip_entry.configure(state="normal")
         self.captcha_label.configure(image=None, text="[Captcha]")
-        # Limpiar referencias para evitar problemas al cargar nuevo captcha
-        if hasattr(self, 'photo'):
-            del self.photo
-        if hasattr(self, 'tmp_val'):
-            del self.tmp_val
         # Limpiar campo de captcha
         self.captcha_entry.delete(0, 'end')
+        # No eliminar captcha_image_ref para evitar problemas con garbage collection
+        # El garbage collector se encargará cuando se asigne una nueva imagen
 
     def check_login(self):
         if not self.is_logged_in:
